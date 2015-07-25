@@ -68,7 +68,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>call "$(DevEnvDir)..\..\VC\vcvarsall.bat" x86_amd64
-tlbexp $(TargetFileName) /asmpath:$(TargetDir)</PostBuildEvent>
+tlbexp $(TargetFileName) /asmpath:$(TargetDir)
+copy "$(TargetDir)$(TargetName).*" "$(SolutionDir)..\..\..\Binaries\Win64\" /Y
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
