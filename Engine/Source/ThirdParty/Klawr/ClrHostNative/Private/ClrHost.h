@@ -64,9 +64,9 @@ public: // IClrHost interface
 
 	virtual void GetScriptComponentTypes(int appDomainID, std::vector<tstring>& types) const override;
 
-	virtual void GetScriptComponentProperties(int appDomainID, tstring typeName, std::vector<tstring>& properties) const override;
+	virtual void GetScriptComponentProperties(int appDomainID, const TCHAR* typeName, std::vector<tstring>& properties) const override;
 
-	virtual int GetScriptComponentPropertyType(int appDomainID, tstring typeName, tstring propertyName) const override;
+	virtual int GetScriptComponentPropertyType(int appDomainID, const TCHAR* typeName, const TCHAR* propertyName) const override;
 public:
 	ClrHost() : _hostControl(nullptr) {}
 

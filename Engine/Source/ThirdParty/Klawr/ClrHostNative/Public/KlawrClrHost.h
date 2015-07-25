@@ -239,9 +239,9 @@ public:
 	virtual void GetScriptComponentTypes(int appDomainID, std::vector<tstring>& types) const = 0;
 
 
-	virtual void GetScriptComponentProperties(int appDomainID, tstring typeName, std::vector<tstring>& properties) const = 0;
+	virtual void GetScriptComponentProperties(int appDomainID, const TCHAR* typeName, std::vector<tstring>& properties) const = 0;
 
-	virtual int GetScriptComponentPropertyType(int appDomainID, tstring typeName, tstring propertyName) const = 0;
+	virtual int GetScriptComponentPropertyType(int appDomainID, const TCHAR* typeName, const TCHAR* propertyName) const = 0;
 public:
 	/** Get the singleton instance. */
 	static IClrHost* Get();
