@@ -101,5 +101,9 @@ namespace Klawr.ClrHost.Interfaces
         /// </summary>
         /// <returns>Script component type names.</returns>
         string[] GetScriptComponentTypes();
+
+        string[] GetScriptComponentPropertyNames(string componentName);
+
+        int GetScriptComponentPropertyType(string componentName, string propertyName);
     }
 }

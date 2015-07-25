@@ -78,6 +78,51 @@ struct ScriptObjectInstanceInfo
 };
 
 /**
+* @brief Contains native/managed interop method pointers for property access.
+*
+* The function pointers in the proxy are bound to the methods of Klawr.ClrHost.Manged 
+* instance. 
+*
+* @note This struct has a managed counterpart by the same name defined in Klawr.ClrHost.Managed,
+*       the managed counterpart is also exposed to native code via COM under the
+*       Klawr::Managed namespace (but it's hidden from clients of this library).
+*       The size and layout of the two structures must remain identical.
+*/
+struct CLRGetterSetterInfo
+{
+	typedef void(*FloatSetter)(__int64 instanceID, TCHAR* propertyName, float value);
+	typedef void(*IntSetter)(__int64 instanceID, TCHAR* propertyName, int value);
+	typedef void(*BoolSetter)(__int64 instanceID, TCHAR* propertyName, bool value);
+	typedef void(*StrSetter)(__int64 instanceID, TCHAR* propertyName, TCHAR* value);
+	typedef void(*ObjSetter)(__int64 instanceID, TCHAR* propertyName, UObject* value);
+	typedef float(*FloatGetter)(__int64 instanceID, TCHAR* propertyName);
+	typedef int(*IntGetter)(__int64 instanceID, TCHAR* propertyName);
+	typedef bool(*BoolGetter)(__int64 instanceID, TCHAR* propertyName);
+	typedef TCHAR*(*StrGetter)(__int64 instanceID, TCHAR* propertyName);
+	typedef UObject*(*ObjGetter)(__int64 instanceID, TCHAR* propertyName);
+	/** Pointer to the managed SetFloat() method of the CLRHost. */
+	FloatSetter SetFloat;
+	/** Pointer to the managed SetInt() method of the CLRHost. */
+	IntSetter SetInt;
+	/** Pointer to the managed SetBool() method of the CLRHost. */
+	BoolSetter SetBool;
+	/** Pointer to the managed SetStr() method of the CLRHost. */
+	StrSetter SetStr;
+	/** Pointer to the managed SetObj() method of the CLRHost. */
+	ObjSetter SetObj;
+	/** Pointer to the managed GetFloat() method of the CLRHost. */
+	FloatGetter GetFloat;
+	/** Pointer to the managed GetInt() method of the CLRHost. */
+	IntGetter GetInt;
+	/** Pointer to the managed GetBool() method of the CLRHost. */
+	BoolGetter GetBool;
+	/** Pointer to the managed GetStr() method of the CLRHost. */
+	StrGetter GetStr;
+	/** Pointer to the managed GetObj() method of the CLRHost. */
+	ObjGetter GetObj;
+};
+
+/**
  * @brief A native proxy for a managed UKlawrScriptComponent instance.
  * 
  * The function pointers in the proxy are bound to the methods of a managed UKlawrScriptComponent 
@@ -193,6 +238,10 @@ public:
 	 */
 	virtual void GetScriptComponentTypes(int appDomainID, std::vector<tstring>& types) const = 0;
 
+
+	virtual void GetScriptComponentProperties(int appDomainID, tstring typeName, std::vector<tstring>& properties) const = 0;
+
+	virtual int GetScriptComponentPropertyType(int appDomainID, tstring typeName, tstring propertyName) const = 0;
 public:
 	/** Get the singleton instance. */
 	static IClrHost* Get();

@@ -24,6 +24,7 @@
 
 using Klawr.ClrHost.Interfaces;
 using Klawr.ClrHost.Managed.SafeHandles;
+using Klawr.ClrHost.Managed.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,12 +91,109 @@ namespace Klawr.ClrHost.Managed
         // cache of previously created script component types
         private Dictionary<string /*Full Type Name*/, ScriptComponentTypeInfo> _scriptComponentTypeCache = new Dictionary<string, ScriptComponentTypeInfo>();
 
+        private Proxies.ClrGetterSetterInfoProxy _clrGetterSetterInfoProxyMethods;
         // NOTE: the base implementation of this method does nothing, so no need to call it
         public override void InitializeNewDomain(AppDomainSetup appDomainInfo)
         {
             // register the custom domain manager with the unmanaged host
             this.InitializationFlags = AppDomainManagerInitializationOptions.RegisterWithHost;
+            this.SetGetterSetterInfoProxy();
         }
+
+        private void SetGetterSetterInfoProxy()
+        {
+            Type thisType = this.GetType();
+            MethodInfo mi = thisType.GetMethod("SetFloatProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.SetFloat = (Proxies.ClrGetterSetterInfoProxy.FloatSetter)Delegate.CreateDelegate(thisType, mi);
+            mi = thisType.GetMethod("GetFloatProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.GetFloat = (Proxies.ClrGetterSetterInfoProxy.FloatGetter)Delegate.CreateDelegate(thisType, mi);
+
+            mi = thisType.GetMethod("SetIntProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.SetInt = (Proxies.ClrGetterSetterInfoProxy.IntSetter)Delegate.CreateDelegate(thisType, mi);
+            mi = thisType.GetMethod("GetIntProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.GetInt = (Proxies.ClrGetterSetterInfoProxy.IntGetter)Delegate.CreateDelegate(thisType, mi);
+
+            mi = thisType.GetMethod("SetBoolProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.SetBool = (Proxies.ClrGetterSetterInfoProxy.BoolSetter)Delegate.CreateDelegate(thisType, mi);
+            mi = thisType.GetMethod("GetBoolProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.GetBool = (Proxies.ClrGetterSetterInfoProxy.BoolGetter)Delegate.CreateDelegate(thisType, mi);
+
+            mi = thisType.GetMethod("SetStrProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.SetStr = (Proxies.ClrGetterSetterInfoProxy.StrSetter)Delegate.CreateDelegate(thisType, mi);
+            mi = thisType.GetMethod("GetStrProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.GetStr = (Proxies.ClrGetterSetterInfoProxy.StrGetter)Delegate.CreateDelegate(thisType, mi);
+
+            mi = thisType.GetMethod("SetObjProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.SetObj = (Proxies.ClrGetterSetterInfoProxy.ObjSetter)Delegate.CreateDelegate(thisType, mi);
+            mi = thisType.GetMethod("GetObjProperty", BindingFlags.Instance);
+            this._clrGetterSetterInfoProxyMethods.GetObj = (Proxies.ClrGetterSetterInfoProxy.ObjGetter)Delegate.CreateDelegate(thisType, mi);
+        }
+
+        private void SetFloat(long instanceID, string propertyName, float value)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            instanceType.GetProperty(propertyName).SetValue(_scriptObjects[instanceID].Instance, value);
+        }
+
+        private void SetInt(long instanceID, string propertyName, int value)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            instanceType.GetProperty(propertyName).SetValue(_scriptObjects[instanceID].Instance, value);
+        }
+
+        private void SetBool(long instanceID, string propertyName, bool value)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            instanceType.GetProperty(propertyName).SetValue(_scriptObjects[instanceID].Instance, value);
+        }
+
+        private void SetStr(long instanceID, string propertyName, string value)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            instanceType.GetProperty(propertyName).SetValue(_scriptObjects[instanceID].Instance, value);
+        }
+
+        private void SetObj(long instanceID, string propertyName, IntPtr value)
+        {
+            /* Have to figure out some things first....
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            instanceType.GetProperty(propertyName).SetValue(_scriptObjects[instanceID].Instance, value);
+             */
+        }
+
+        private float GetFloat(long instanceID, string propertyName)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            return (float)instanceType.GetProperty(propertyName).GetValue(_scriptObjects[instanceID].Instance);
+        }
+
+        private int GetInt(long instanceID, string propertyName)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            return (int)instanceType.GetProperty(propertyName).GetValue(_scriptObjects[instanceID].Instance);
+        }
+
+        private bool GetBool(long instanceID, string propertyName)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            return (bool)instanceType.GetProperty(propertyName).GetValue(_scriptObjects[instanceID].Instance);
+        }
+
+        private string GetString(long instanceID, string propertyName)
+        {
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            return (string)instanceType.GetProperty(propertyName).GetValue(_scriptObjects[instanceID].Instance);
+        }
+
+        private IntPtr GetObj(long instanceID, string propertyName)
+        {
+            /* like above, have to figure it out first
+            Type instanceType = _scriptObjects[instanceID].Instance.GetType();
+            return (IntPtr)instanceType.GetProperty(propertyName).GetValue(_scriptObjects[instanceID].Instance);
+            */
+            return default(IntPtr);
+        }
+
 
         public void SetNativeFunctionPointers(string nativeClassName, long[] functionPointers)
         {
@@ -177,7 +275,7 @@ namespace Klawr.ClrHost.Managed
             var instance = UnregisterScriptObject(scriptObjectInstanceID);
             instance.Dispose();
         }
-        
+
         /// <summary>
         /// Note that the identifier returned by this method is only unique amongst all ScriptObject 
         /// instances registered with this manager instance. The returned identifier can be used to 
@@ -236,7 +334,7 @@ namespace Klawr.ClrHost.Managed
                     .Where(assembly => !assembly.IsDynamic)
                     .SelectMany(assembly => assembly.GetTypes())
                     .FirstOrDefault(
-                        t => t.FullName.Equals(typeName) 
+                        t => t.FullName.Equals(typeName)
                             && t.GetInterfaces().Contains(typeof(IScriptObject))
                     );
 
@@ -470,6 +568,28 @@ namespace Klawr.ClrHost.Managed
                 .Where(t => t.IsSubclassOf(scriptComponentType))
                 .Select(t => t.FullName)
                 .ToArray();
+        }
+
+        public string[] GetScriptComponentPropertyNames(string componentName)
+        {
+            var scriptComponentType = FindTypeByName(componentName);
+            return scriptComponentType.GetProperties().Where(property => property.GetCustomAttributes<UPROPERTYAttribute>(true).Any()).Select(x => x.Name).ToArray();
+        }
+
+        public int GetScriptComponentPropertyType(string componentName, string propertyName)
+        {
+            PropertyInfo pi = FindTypeByName(componentName).GetProperty(propertyName);
+            if (pi.PropertyType==typeof(float))
+            { return 0; }
+            else if (pi.PropertyType == typeof(int))
+            { return 1; }
+            else if (pi.PropertyType == typeof(bool))
+            { return 2; }
+            else if (pi.PropertyType == typeof(string))
+            { return 3; }
+
+            // Unknown type??
+            return -1;
         }
     }
 }
