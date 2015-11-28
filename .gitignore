@@ -30,3 +30,6 @@ Engine/Source/ThirdParty/Klawr/ipch/
 Engine/Plugins/Klawr/KlawrRuntimePlugin/Intermediate/
 Engine/Plugins/Klawr/KlawrCodeGeneratorPlugin/Intermediate/
 Engine/Plugins/Klawr/KlawrEditorPlugin/Intermediate/
+Engine/Source/ThirdParty/Klawr/ClrHostNative/Release/Klawr.Cl.91E04618.tlog/CL.command.1.tlog
+Engine/Source/ThirdParty/Klawr/ClrHostNative/Release/Klawr.Cl.91E04618.tlog/Klawr.ClrHost.Native.lastbuildstate
+Engine/Source/ThirdParty/Klawr/ClrHostNative/Release/Klawr.Cl.91E04618.tlog/unsuccessfulbuild
